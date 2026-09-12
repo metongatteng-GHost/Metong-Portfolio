@@ -2,13 +2,13 @@ backend:
   name: git-gateway
   branch: main   # change to "master" if that's your repo's default branch
 
-media_folder: "assets"
+media_folder: "metong-portfolio-blog-ready/assets"
 public_folder: "/assets"
 
 collections:
   - name: "posts"
     label: "Blog Posts"
-    folder: "content/posts"
+    folder: "metong-portfolio-blog-ready/content/posts"
     create: true
     slug: "{{slug}}"
     extension: "md"
