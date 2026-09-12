@@ -1,0 +1,34 @@
+backend:
+  name: git-gateway
+  branch: main   # change to "master" if that's your repo's default branch
+
+media_folder: "assets"
+public_folder: "/assets"
+
+collections:
+  - name: "posts"
+    label: "Blog Posts"
+    folder: "content/posts"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    identifier_field: "title"
+    summary: "{{title}} — {{date}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - label: "Slug"
+        name: "slug"
+        widget: "string"
+        hint: "Lowercase, hyphens only, no spaces. This becomes the live URL: /posts/your-slug.html"
+        pattern: ['^[a-z0-9]+(-[a-z0-9]+)*$', "Lowercase letters, numbers and hyphens only"]
+      - { label: "Date", name: "date", widget: "datetime", format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false, picker_utc: true }
+      - label: "Tag"
+        name: "tag"
+        widget: "select"
+        options: ["SCHEDULING", "COST CONTROL", "CLAIMS", "CAREER", "TOOLS"]
+      - label: "Excerpt"
+        name: "excerpt"
+        widget: "text"
+        hint: "1–2 sentences. This is what shows up in Google results and LinkedIn/X preview cards — write it like a hook."
+      - { label: "Cover Image", name: "cover", widget: "image", required: false, hint: "Optional. Falls back to your headshot if left blank." }
+      - { label: "Body", name: "body", widget: "markdown" }

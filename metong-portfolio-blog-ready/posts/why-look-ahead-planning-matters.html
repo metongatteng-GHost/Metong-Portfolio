@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why a 2–3 Week Look-Ahead Beats a Perfect Master Schedule — Metong Atteng</title>
+<meta name="description" content="A perfect Primavera P6 baseline is worthless if nobody checks it week to week. Here is how rolling look-aheads actually protect the critical path on live EPC sites.">
+<link rel="canonical" href="https://metongatteng.netlify.app/posts/why-look-ahead-planning-matters.html">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Metong Atteng">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Why a 2–3 Week Look-Ahead Beats a Perfect Master Schedule">
+<meta property="og:description" content="A perfect Primavera P6 baseline is worthless if nobody checks it week to week. Here is how rolling look-aheads actually protect the critical path on live EPC sites.">
+<meta property="og:image" content="https://metongatteng.netlify.app/assets/schedule-01-gt-outage.jpg">
+<meta property="og:url" content="https://metongatteng.netlify.app/posts/why-look-ahead-planning-matters.html">
+<meta property="og:site_name" content="Metong Atteng">
+<meta property="article:published_time" content="2026-09-11">
+<meta property="article:author" content="Metong Atteng">
+<meta property="article:tag" content="SCHEDULING">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Why a 2–3 Week Look-Ahead Beats a Perfect Master Schedule">
+<meta name="twitter:description" content="A perfect Primavera P6 baseline is worthless if nobody checks it week to week. Here is how rolling look-aheads actually protect the critical path on live EPC sites.">
+<meta name="twitter:image" content="https://metongatteng.netlify.app/assets/schedule-01-gt-outage.jpg">
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Why a 2–3 Week Look-Ahead Beats a Perfect Master Schedule","description":"A perfect Primavera P6 baseline is worthless if nobody checks it week to week. Here is how rolling look-aheads actually protect the critical path on live EPC sites.","image":["https://metongatteng.netlify.app/assets/schedule-01-gt-outage.jpg"],"datePublished":"2026-09-11","dateModified":"2026-09-11","author":{"@type":"Person","name":"Metong Atteng","url":"https://metongatteng.netlify.app/index.html"},"publisher":{"@type":"Person","name":"Metong Atteng"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://metongatteng.netlify.app/posts/why-look-ahead-planning-matters.html"}}</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23eaeef1'/%3E%3Crect x='5' y='5' width='54' height='54' fill='none' stroke='%23e8890f' stroke-width='4'/%3E%3Ctext x='32' y='41' font-family='monospace,Arial' font-size='22' font-weight='700' fill='%2312222e' text-anchor='middle'%3EMA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eaeef1; --bg-panel:#ffffff; --bg-panel-2:#f2f5f7;
+  --line:rgba(20,40,55,0.12); --accent:#e8890f; --accent-dim:rgba(232,137,15,0.14);
+  --accent-2:#0d8c78; --accent-2-dim:rgba(13,140,120,0.12);
+  --text:#12222e; --text-muted:#5c6b76;
+  --font-display:'Big Shoulders Display', sans-serif;
+  --font-body:'IBM Plex Sans', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{ margin:0; background:
+    radial-gradient(ellipse 900px 500px at 12% -8%, rgba(232,137,15,0.06), transparent 60%),
+    radial-gradient(ellipse 800px 600px at 88% 8%, rgba(13,140,120,0.06), transparent 55%),
+    var(--bg);
+  color:var(--text); font-family:var(--font-body); -webkit-font-smoothing:antialiased; }
+a{color:inherit;} img{max-width:100%; display:block; border-radius:2px;}
+::selection{background:var(--accent-dim); color:var(--accent);}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+.wrap{max-width:900px; margin:0 auto; padding:0 28px;}
+header.nav{ position:fixed; top:0; left:0; right:0; z-index:50; background:rgba(234,238,241,0.85); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+.nav-inner{ max-width:900px; margin:0 auto; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.nav-id{ display:flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:13px; color:var(--text-muted); text-decoration:none; margin-right:auto; }
+.nav-id .tag{ border:1px solid var(--accent-2); color:var(--accent-2); padding:3px 7px; font-weight:600; letter-spacing:0.03em; }
+.blog-link{ font-family:var(--font-mono); font-size:13px; color:var(--text); text-decoration:none; border:1px solid var(--line); padding:9px 16px; white-space:nowrap; }
+.blog-link:hover{ border-color:var(--accent); color:var(--accent); }
+.hero{ padding:150px 0 40px; }
+.eyebrow{ font-family:var(--font-mono); font-size:13px; letter-spacing:0.14em; color:var(--accent); text-transform:uppercase; margin:0 0 18px; display:flex; align-items:center; gap:10px; }
+.eyebrow::before{ content:''; width:26px; height:1px; background:var(--accent); display:inline-block; }
+h1.headline{ font-family:var(--font-display); font-weight:900; font-size:clamp(2.2rem,5vw,3.4rem); line-height:1; margin:0 0 16px; }
+.hero p.sub{ color:var(--text-muted); max-width:60ch; line-height:1.6; font-size:1.05rem; margin:0; }
+.post-list{ display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:80px; }
+.post-card{ display:block; background:var(--bg-panel); padding:28px; text-decoration:none; color:inherit; transition:background .15s ease; }
+.post-card:hover{ background:var(--bg-panel-2); }
+.post-date{ font-family:var(--font-mono); font-size:12px; color:var(--text-muted); }
+.post-title{ font-family:var(--font-display); font-weight:800; font-size:1.4rem; margin:8px 0 8px; }
+.post-excerpt{ color:#33434e; line-height:1.6; margin:0 0 14px; font-size:.98rem; }
+.post-meta-row{ display:flex; gap:18px; align-items:center; font-family:var(--font-mono); font-size:12px; color:var(--text-muted); }
+.tag-pill{ border:1px solid var(--accent-2); color:var(--accent-2); padding:3px 8px; }
+.back-link{ font-family:var(--font-mono); font-size:13px; color:var(--text-muted); text-decoration:none; display:inline-block; margin-bottom:28px; }
+.back-link:hover{ color:var(--accent); }
+.article-body{ line-height:1.8; font-size:1.03rem; color:#243441; margin-top:36px; }
+.article-body p{ margin:0 0 20px; }
+.article-body h3{ font-family:var(--font-display); font-size:1.3rem; margin:32px 0 12px; }
+.article-body img{ margin:24px 0; }
+.article-body code{ background:var(--bg-panel-2); padding:2px 6px; font-family:var(--font-mono); font-size:0.92em; }
+.engage-row{ display:flex; align-items:center; gap:16px; margin:40px 0; padding:20px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+.like-btn{ display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:13.5px; border:1px solid var(--line); background:var(--bg-panel); padding:10px 16px; cursor:pointer; color:var(--text); transition:border-color .15s ease, color .15s ease; }
+.like-btn:hover{ border-color:var(--accent); color:var(--accent); }
+.like-btn.liked{ border-color:var(--accent); color:var(--accent); background:var(--accent-dim); }
+.like-note{ font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted); }
+.share-row{ display:flex; gap:10px; flex-wrap:wrap; }
+.share-btn{ font-family:var(--font-mono); font-size:12.5px; border:1px solid var(--line); padding:9px 14px; text-decoration:none; color:var(--text); }
+.share-btn:hover{ border-color:var(--accent); color:var(--accent); }
+.comments-section{ margin-top:20px; }
+.comments-heading{ font-family:var(--font-display); font-weight:800; font-size:1.2rem; margin:0 0 16px; }
+.giscus-note{ font-family:var(--font-mono); font-size:12px; color:var(--text-muted); border:1px dashed var(--line); padding:14px; margin-bottom:16px; }
+footer{ padding:36px 0 60px; text-align:center; font-family:var(--font-mono); font-size:12px; color:var(--text-muted); }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a href="../index.html#top" class="nav-id"><span class="tag">MA</span> METONG ATTENG</a>
+    <a href="../index.html#engage" class="blog-link">Portfolio →</a>
+  </div>
+</header>
+
+<div class="wrap hero" style="padding-bottom:0;">
+  <a href="../blog.html" class="back-link">← Back to all posts</a>
+  <p class="eyebrow">SCHEDULING</p>
+  <h1 class="headline" style="font-size:clamp(1.8rem,4vw,2.6rem);">Why a 2–3 Week Look-Ahead Beats a Perfect Master Schedule</h1>
+  <p class="post-date">11 September 2026 · 1 min read</p>
+</div>
+
+<div class="wrap">
+  <article class="article-body">
+    <p>This is a placeholder article — go to <strong>yoursite.com/admin</strong> and edit this post from there once your CMS is live, or just overwrite this file.</p>
+<p>Write your paragraphs as plain text. Use <strong>bold</strong> or <em>italic</em> for emphasis, and <a href="https://example.com" target="_blank" rel="noopener">links</a> work normally too.</p>
+<h3>A subheading looks like this</h3>
+<p>Use two hashes for a subheading, or three for a smaller one. Bullet lists work like this:</p>
+<ul>
+<li>First point</li>
+<li>Second point</li>
+<li>Third point</li>
+</ul>
+<p>When you're ready, publish from the admin page and this becomes a real, indexable page at `/posts/why-look-ahead-planning-matters.html` within about a minute.</p>
+  </article>
+
+  <div class="engage-row">
+    <button class="like-btn" id="likeBtn"><span id="likeIcon">🤍</span> <span id="likeLabel">Like</span> <span id="likeCount">0</span></button>
+    <span class="like-note">Likes are saved to your own browser, not shared publicly across visitors.</span>
+  </div>
+
+  <div class="share-row">
+    <a class="share-btn" target="_blank" rel="noopener" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fmetongatteng.netlify.app%2Fposts%2Fwhy-look-ahead-planning-matters.html">Share on LinkedIn</a>
+    <a class="share-btn" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fmetongatteng.netlify.app%2Fposts%2Fwhy-look-ahead-planning-matters.html&text=Why%20a%202%E2%80%933%20Week%20Look-Ahead%20Beats%20a%20Perfect%20Master%20Schedule">Share on X</a>
+    <a class="share-btn" href="mailto:?subject=Why%20a%202%E2%80%933%20Week%20Look-Ahead%20Beats%20a%20Perfect%20Master%20Schedule&body=https%3A%2F%2Fmetongatteng.netlify.app%2Fposts%2Fwhy-look-ahead-planning-matters.html">Share by email</a>
+  </div>
+
+  <div class="comments-section">
+    <h3 class="comments-heading">Comments</h3>
+    <div class="giscus-note">Comments run on Giscus. To activate: enable Discussions on your GitHub repo, install the giscus app, then paste your repo/category IDs into the script below.</div>
+    <div id="giscusThread">
+      <!-- <script src="https://giscus.app/client.js" data-repo="yourname/yourrepo" data-repo-id="..." data-category="Comments" data-category-id="..." data-mapping="pathname" data-reactions-enabled="1" data-theme="light" crossorigin="anonymous" async></script> -->
+    </div>
+  </div>
+</div>
+
+<footer>© <span id="year"></span> Metong Atteng — Planning, Scheduling & Cost Controls Engineer, Nigeria.</footer>
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+<script>
+(function(){
+  const key = 'like_why-look-ahead-planning-matters';
+  const btn = document.getElementById('likeBtn');
+  const label = document.getElementById('likeLabel');
+  const countEl = document.getElementById('likeCount');
+  let liked = localStorage.getItem(key) === '1';
+  let count = parseInt(localStorage.getItem(key+'_count') || '0', 10);
+  function render(){
+    btn.classList.toggle('liked', liked);
+    document.getElementById('likeIcon').textContent = liked ? '❤️' : '🤍';
+    label.textContent = liked ? 'Liked' : 'Like';
+    countEl.textContent = count;
+  }
+  render();
+  btn.onclick = function(){
+    liked = !liked;
+    count = count + (liked ? 1 : -1);
+    localStorage.setItem(key, liked ? '1' : '0');
+    localStorage.setItem(key+'_count', String(count));
+    render();
+  };
+})();
+</script>
+</body>
+</html>

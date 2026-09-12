@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metong Atteng — Planning &amp; Controls Engineer</title>
+<meta name="description" content="Metong Atteng — Project Planning, Scheduling &amp; Cost Controls Engineer. Primavera P6, EVM, delay analysis and S-curves for EPC, solar and infrastructure projects.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23eaeef1'/%3E%3Crect x='5' y='5' width='54' height='54' fill='none' stroke='%23e8890f' stroke-width='4'/%3E%3Ctext x='32' y='41' font-family='monospace,Arial' font-size='22' font-weight='700' fill='%2312222e' text-anchor='middle'%3EMA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#eaeef1;
+    --bg-panel:#ffffff;
+    --bg-panel-2:#f2f5f7;
+    --line:rgba(20,40,55,0.12);
+    --accent:#e8890f;
+    --accent-dim:rgba(232,137,15,0.14);
+    --accent-2:#0d8c78;
+    --accent-2-dim:rgba(13,140,120,0.12);
+    --text:#12222e;
+    --text-muted:#5c6b76;
+    --data-blue:#2f6690;
+    --good:#1f9e6f;
+    --font-display:'Big Shoulders Display', sans-serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 12% -8%, rgba(232,137,15,0.06), transparent 60%),
+      radial-gradient(ellipse 800px 600px at 88% 8%, rgba(13,140,120,0.06), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;}
+  img{max-width:100%;display:block;}
+
+  ::selection{background:var(--accent-dim); color:var(--accent);}
+
+  :focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+
+  .wrap{max-width:1100px; margin:0 auto; padding:0 28px;}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    background:rgba(234,238,241,0.85);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:1100px; margin:0 auto; padding:14px 28px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .nav-id{
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--font-mono); font-size:13px; color:var(--text-muted);
+    text-decoration:none;
+    margin-right:auto; /* keep name pinned to the side, not centered */
+  }
+  .nav-id .tag{
+    border:1px solid var(--accent-2); color:var(--accent-2);
+    padding:3px 7px; font-weight:600; letter-spacing:0.03em;
+  }
+  .blog-link{
+    font-family:var(--font-mono); font-size:13px; color:var(--text); text-decoration:none;
+    border:1px solid var(--line); padding:9px 16px; white-space:nowrap;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .blog-link:hover{ border-color:var(--accent); color:var(--accent); }
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar-toggle{
+    position:fixed; top:88px; left:0; z-index:80;
+    width:34px; height:40px; border:1px solid var(--line); border-left:none;
+    background:var(--bg-panel); color:var(--text); font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:0 8px 8px 0;
+    transition:opacity .2s ease, border-color .15s ease, color .15s ease;
+  }
+  .sidebar-toggle:hover{ border-color:var(--accent); color:var(--accent); }
+  .sidebar-toggle.is-hidden{ opacity:0; pointer-events:none; }
+
+  .sidebar-backdrop{
+    position:fixed; inset:0; background:rgba(10,13,18,0.45); z-index:85;
+    opacity:0; pointer-events:none; transition:opacity .3s ease;
+  }
+  .sidebar-backdrop.show{ pointer-events:auto; }
+  @media (max-width:900px){ .sidebar-backdrop.show{ opacity:1; } }
+
+  .sidebar{
+    position:fixed; top:0; left:0; height:100vh; width:270px; z-index:90;
+    background:transparent;
+    padding:26px; overflow-y:auto;
+    display:flex; flex-direction:column; justify-content:center;
+    transform:translateX(-100%); transition:transform .3s ease;
+  }
+  .sidebar:not(.closed){ transform:translateX(0); }
+  .sidebar-links{ display:flex; flex-direction:column; gap:24px; }
+  .sidebar-links a{
+    font-family:var(--font-mono); font-size:14px; text-decoration:none;
+    color:var(--text-muted); display:flex; align-items:baseline; gap:10px;
+    transition:color .15s ease;
+  }
+  .sidebar-links a:hover{ color:var(--accent); }
+  .sidebar-links .num{ color:var(--accent); }
+  .sidebar-close{
+    position:absolute; top:88px; right:24px; width:32px; height:32px;
+    border:1px solid var(--line); background:transparent; color:var(--text-muted);
+    cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;
+  }
+  .sidebar-close:hover{ border-color:var(--accent); color:var(--accent); }
+  .sidebar-blog-link{
+    display:block; margin-top:36px; padding-top:20px; border-top:1px dashed var(--line);
+    font-family:var(--font-mono); font-size:14px; color:var(--accent-2); text-decoration:none;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:168px 0 90px;
+    position:relative;
+  }
+  .hero-grid{
+    display:grid; grid-template-columns:1.5fr 0.9fr; gap:56px; align-items:start;
+  }
+  .hero-copy{ min-width:0; }
+  .id-card{
+    justify-self:end; width:100%; max-width:300px;
+    background:var(--bg-panel); border:1px solid var(--line);
+    padding:14px 14px 18px;
+  }
+  .id-photo{
+    width:100%; aspect-ratio:4/5; overflow:hidden;
+    background:var(--bg-panel-2);
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line);
+  }
+  .id-photo img{ width:100%; height:100%; object-fit:cover; }
+  .id-photo svg{ width:42%; opacity:0.35; }
+  .id-caption{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-top:14px; padding-top:12px; border-top:1px dashed var(--line);
+  }
+  .id-name{ font-family:var(--font-display); font-weight:800; font-size:1.15rem; line-height:1.05; }
+  .id-role{ font-family:var(--font-mono); font-size:11px; color:var(--text-muted); margin-top:4px; letter-spacing:0.02em; }
+  .id-stamp{
+    font-family:var(--font-mono); font-size:10px; color:var(--accent-2);
+    border:1px solid var(--accent-2); padding:3px 6px; white-space:nowrap;
+  }
+  @media (max-width:860px){
+    .hero-grid{ grid-template-columns:1fr; }
+    .id-card{ justify-self:start; max-width:220px; }
+  }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:13px; letter-spacing:0.14em;
+    color:var(--accent); text-transform:uppercase; margin:0 0 22px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:''; width:26px; height:1px; background:var(--accent); display:inline-block;
+  }
+  h1.headline{
+    font-family:var(--font-display); font-weight:900;
+    font-size:clamp(2.6rem, 6.4vw, 5rem);
+    line-height:0.98; letter-spacing:-0.01em;
+    margin:0 0 26px; max-width:15ch;
+  }
+  h1.headline .accent-word{color:var(--accent);}
+  .sub{
+    font-size:clamp(1.02rem, 1.6vw, 1.22rem); color:var(--text-muted);
+    max-width:56ch; line-height:1.6; margin:0 0 40px;
+  }
+  .cta-row{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:64px;}
+  .btn{
+    font-family:var(--font-mono); font-size:13.5px; font-weight:600;
+    padding:14px 24px; text-decoration:none; letter-spacing:0.02em;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .15s ease, background .15s ease, color .15s ease;
+    border:1px solid transparent;
+  }
+  .btn-primary{ background:var(--accent); color:#14202b; }
+  .btn-primary:hover{ transform:translateY(-2px); }
+  .btn-ghost{ border-color:var(--line); color:var(--text); }
+  .btn-ghost:hover{ border-color:var(--accent); color:var(--accent); }
+
+  /* status strip */
+  .status-strip{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line);
+  }
+  .status-cell{
+    background:var(--bg-panel); padding:22px 24px;
+  }
+  .status-cell .num{
+    font-family:var(--font-mono); font-size:1.9rem; font-weight:600; color:var(--accent);
+    display:block; margin-bottom:6px;
+  }
+  .status-cell .lbl{
+    font-size:13px; color:var(--text-muted); line-height:1.4;
+  }
+  @media (max-width:720px){ .status-strip{grid-template-columns:1fr;} }
+
+  /* ---------- SECTION SCAFFOLD ---------- */
+  section{ padding:110px 0; border-top:1px solid var(--line); position:relative; }
+  .sec-head{ display:flex; align-items:baseline; gap:16px; margin-bottom:52px; }
+  .sec-code{
+    font-family:var(--font-mono); color:var(--accent); font-size:15px; font-weight:600;
+    border:1px solid var(--accent); padding:5px 10px; flex-shrink:0;
+  }
+  .sec-title{
+    font-family:var(--font-display); font-weight:800; font-size:clamp(1.8rem,3.2vw,2.6rem);
+    letter-spacing:-0.01em; margin:0;
+  }
+  .sec-lede{ color:var(--text-muted); max-width:60ch; line-height:1.65; margin:-30px 0 50px; font-size:1.02rem;}
+
+  .reveal{ opacity:0; transform:translateY(22px); transition:opacity .6s ease, transform .6s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ---------- PROFILE ---------- */
+  .profile-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:60px; }
+  .profile-text p{ line-height:1.75; color:#33434e; margin:0 0 18px; font-size:1.02rem;}
+  .profile-text strong{ color:var(--text); }
+  .credentials{ list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }
+  .credentials li{
+    display:flex; justify-content:space-between; gap:14px;
+    padding:14px 0; border-bottom:1px solid var(--line);
+    font-size:13.5px;
+  }
+  .credentials .k{ color:var(--text-muted); font-family:var(--font-mono); }
+  .credentials .v{ text-align:right; color:var(--text); font-weight:500; }
+  @media (max-width:800px){ .profile-grid{grid-template-columns:1fr;} }
+
+  /* ---------- CAPABILITIES ---------- */
+  .cap-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .cap-card{
+    background:var(--bg-panel); padding:30px 28px; min-height:170px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .cap-card .code{ font-family:var(--font-mono); color:var(--accent); font-size:13px; }
+  .cap-card h3{ font-family:var(--font-body); font-weight:600; font-size:1.08rem; margin:0; }
+  .cap-card p{ color:var(--text-muted); font-size:14px; line-height:1.55; margin:0; }
+  @media (max-width:800px){ .cap-grid{grid-template-columns:1fr;} }
+
+  /* ---------- TRACK RECORD ---------- */
+  .proj{
+    border:1px solid var(--line); background:var(--bg-panel);
+    margin-bottom:26px; padding:36px;
+  }
+  .proj-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap; margin-bottom:18px;}
+  .proj-title{ font-family:var(--font-display); font-weight:800; font-size:1.5rem; margin:0 0 6px; }
+  .proj-meta{ font-family:var(--font-mono); font-size:12.5px; color:var(--text-muted); }
+  .proj-role{
+    font-family:var(--font-mono); font-size:12px; color:var(--accent);
+    border:1px solid var(--accent); padding:5px 10px; white-space:nowrap; align-self:flex-start;
+  }
+  .proj-stats{ display:flex; gap:28px; flex-wrap:wrap; margin:20px 0; padding:18px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .proj-stats .stat b{ display:block; font-family:var(--font-mono); color:var(--accent); font-size:1.25rem; }
+  .proj-stats .stat span{ font-size:12.5px; color:var(--text-muted); }
+  .proj ul{ margin:0; padding-left:20px; color:#33434e; line-height:1.7; font-size:14.5px; }
+  .proj ul li{ margin-bottom:6px; }
+
+  /* ---------- DASHBOARD DEMO ---------- */
+  .dash-panel{
+    border:1px solid var(--line); background:var(--bg-panel-2); padding:32px;
+  }
+  .dash-top{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:22px; }
+  .dash-badges{ display:flex; gap:10px; flex-wrap:wrap; }
+  .badge{
+    font-family:var(--font-mono); font-size:12px; padding:8px 12px;
+    border:1px solid var(--line); color:var(--text-muted);
+  }
+  .badge b{ color:var(--accent); }
+  .chart-wrap{ position:relative; height:360px; }
+  .dash-note{
+    margin-top:18px; font-size:12.5px; color:var(--text-muted); font-family:var(--font-mono);
+    border-left:2px solid var(--accent); padding-left:12px;
+  }
+
+  /* ---------- SAMPLE WORK CAROUSEL ---------- */
+  .carousel{ display:flex; align-items:flex-start; gap:14px; }
+  .carousel-arrow{
+    flex-shrink:0; width:44px; height:44px; margin-top:calc(50% - 22px);
+    border:1px solid var(--line); background:var(--bg-panel);
+    color:var(--text); font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .carousel-arrow:hover{ border-color:var(--accent); color:var(--accent); }
+  .carousel-arrow:disabled{ opacity:0.3; cursor:default; }
+  .carousel-arrow:disabled:hover{ border-color:var(--line); color:var(--text); }
+  .carousel-viewport{ flex:1; min-width:0; overflow:hidden; }
+  .carousel-track{ display:flex; transition:transform .4s cubic-bezier(.4,0,.2,1); }
+  .carousel-slide{ flex:0 0 100%; min-width:0; }
+  .sample-panel{
+    border:1px solid var(--line); background:var(--bg-panel); padding:20px;
+  }
+  .sample-tag{
+    display:inline-block; font-family:var(--font-mono); font-size:11px; letter-spacing:0.04em;
+    color:var(--accent-2); border:1px solid var(--accent-2); padding:4px 9px; margin-bottom:6px;
+  }
+  .sample-title{ font-family:var(--font-display); font-weight:800; font-size:1.25rem; margin:8px 0 16px; }
+  .sample-pages{ display:flex; flex-direction:column; gap:14px; }
+  .sample-page-label{
+    font-family:var(--font-mono); font-size:11px; color:var(--text-muted); margin-bottom:6px; display:block;
+  }
+  .sample-img{
+    width:100%; display:block; border:1px solid var(--line); background:#fff;
+  }
+  .sample-footer{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;
+    gap:16px; margin-top:18px; padding-top:16px; border-top:1px dashed var(--line);
+  }
+  .sample-legend{ display:flex; gap:18px; flex-wrap:wrap; }
+  .sample-legend span{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:var(--font-mono); font-size:12px; color:var(--text-muted);
+  }
+  .sample-legend i{ width:12px; height:12px; display:inline-block; flex-shrink:0; }
+  .carousel-status{
+    text-align:center; font-family:var(--font-mono); font-size:12px; color:var(--text-muted);
+    margin-top:16px;
+  }
+  @media (max-width:720px){
+    .carousel-arrow{ width:36px; height:36px; margin-top:0; align-self:center; }
+  }
+
+  /* ---------- ENGAGE ---------- */
+  .engage-inner{
+    text-align:left; border:1px solid var(--line); background:var(--bg-panel);
+    padding:56px 44px; display:grid; grid-template-columns:1.2fr 1fr; gap:40px;
+  }
+  .engage-inner h2{ font-family:var(--font-display); font-weight:800; font-size:clamp(1.8rem,3.4vw,2.5rem); margin:0 0 18px; line-height:1.05;}
+  .engage-inner p{ color:var(--text-muted); line-height:1.65; margin:0; font-size:1rem; }
+  .engage-actions{ display:flex; flex-direction:column; gap:12px; justify-content:center; }
+  .contact-dropdown{ position:relative; }
+  .contact-toggle{
+    width:100%; font-family:var(--font-mono); font-size:14px; font-weight:600;
+    padding:16px 20px; border:1px solid var(--accent); background:var(--accent); color:#14202b;
+    display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+    transition:background .15s ease;
+  }
+  .contact-toggle:hover{ background:#d97e0d; }
+  .contact-toggle .chev{ transition:transform .2s ease; }
+  .contact-toggle.open .chev{ transform:rotate(180deg); }
+  .contact-menu{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    border:1px solid var(--line); border-top:none; background:var(--bg-panel);
+  }
+  .contact-menu.open{ max-height:260px; }
+  .contact-menu a{
+    font-family:var(--font-mono); font-size:14px; text-decoration:none;
+    padding:16px 20px; display:flex; justify-content:space-between; align-items:center;
+    color:var(--text); border-top:1px solid var(--line); transition:color .15s ease;
+  }
+  .contact-menu a:hover{ color:var(--accent); }
+  .contact-menu a span.arrow{ color:var(--accent); }
+  @media (max-width:800px){ .engage-inner{grid-template-columns:1fr;} }
+
+  footer{
+    padding:36px 0 60px; text-align:center;
+    font-family:var(--font-mono); font-size:12px; color:var(--text-muted);
+  }
+
+  /* ---------- CHAT WIDGET ---------- */
+  .chat-fab{
+    position:fixed; bottom:24px; right:24px; z-index:95;
+    width:56px; height:56px; border-radius:50%; border:none;
+    background:var(--accent); color:#14202b; font-size:22px; cursor:pointer;
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
+  }
+  .chat-panel{
+    position:fixed; bottom:92px; right:24px; z-index:95;
+    width:320px; max-width:calc(100vw - 32px); height:440px; max-height:calc(100vh - 140px);
+    background:var(--bg-panel); border:1px solid var(--line);
+    display:flex; flex-direction:column; overflow:hidden;
+    opacity:0; transform:translateY(12px); pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .chat-panel.open{ opacity:1; transform:translateY(0); pointer-events:auto; }
+  .chat-head{
+    background:var(--accent); color:#14202b; font-family:var(--font-mono); font-weight:600;
+    font-size:13px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .chat-head button{ background:none; border:none; color:#14202b; cursor:pointer; font-size:14px; }
+  .chat-body{ flex:1; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
+  .chat-msg{ font-family:var(--font-body); font-size:13.5px; line-height:1.5; margin:0; padding:9px 12px; max-width:88%; }
+  .chat-msg.bot{ background:var(--bg-panel-2); color:var(--text); align-self:flex-start; }
+  .chat-msg.user{ background:var(--accent-dim); color:var(--text); align-self:flex-end; }
+  .chat-quick{ display:flex; gap:8px; flex-wrap:wrap; padding:0 16px 10px; }
+  .chat-quick button{
+    font-family:var(--font-mono); font-size:11.5px; padding:6px 10px;
+    border:1px solid var(--line); background:transparent; color:var(--text-muted); cursor:pointer;
+  }
+  .chat-quick button:hover{ border-color:var(--accent); color:var(--accent); }
+  .chat-input-row{ display:flex; border-top:1px solid var(--line); }
+  .chat-input-row input{
+    flex:1; border:none; background:transparent; padding:12px 14px; font-family:var(--font-body);
+    font-size:13.5px; color:var(--text); outline:none;
+  }
+  .chat-input-row button{
+    width:44px; border:none; background:var(--accent); color:#14202b; font-weight:700; cursor:pointer;
+  }
+  .chat-quick-inline{ padding:0 0 2px; align-self:flex-start; }
+  .chat-typing{ display:flex; gap:4px; align-items:center; padding:12px; }
+  .chat-typing span{
+    width:6px; height:6px; border-radius:50%; background:var(--text-muted);
+    opacity:.4; animation:chatTyping 1s infinite ease-in-out;
+  }
+  .chat-typing span:nth-child(2){ animation-delay:.15s; }
+  .chat-typing span:nth-child(3){ animation-delay:.3s; }
+  @keyframes chatTyping{ 0%,80%,100%{ opacity:.25; transform:translateY(0); } 40%{ opacity:1; transform:translateY(-3px); } }
+  .chat-live-dot{
+    width:7px; height:7px; border-radius:50%; background:#1f9e6f; display:inline-block;
+    box-shadow:0 0 0 rgba(31,158,111,0.5); animation:chatPulse 2s infinite;
+  }
+  @keyframes chatPulse{ 0%{ box-shadow:0 0 0 0 rgba(31,158,111,0.5); } 70%{ box-shadow:0 0 0 6px rgba(31,158,111,0); } 100%{ box-shadow:0 0 0 0 rgba(31,158,111,0); } }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-id"><span class="tag">MA</span> METONG ATTENG</a>
+    <a href="blog.html" class="blog-link">Blog →</a>
+  </div>
+</header>
+
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">›</button>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-close" id="sidebarClose" aria-label="Collapse menu">‹</button>
+  <nav class="sidebar-links">
+    <a href="#profile"><span class="num">1.0</span>Profile</a>
+    <a href="#capabilities"><span class="num">2.0</span>Capabilities</a>
+    <a href="#track-record"><span class="num">3.0</span>Track Record</a>
+    <a href="#sample-work"><span class="num">4.0</span>Sample Work</a>
+    <a href="#dashboard"><span class="num">5.0</span>Dashboard</a>
+    <a href="#engage"><span class="num">6.0</span>Engage</a>
+  </nav>
+  <a href="blog.html" class="sidebar-blog-link">Read the Blog →</a>
+</aside>
+
+<div id="top" class="wrap hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">Planning &amp; Controls Engineer — Nigeria</p>
+      <h1 class="headline">I keep EPC projects <span class="accent-word">on schedule</span> and under budget.</h1>
+      <p class="sub">Primavera P6 scheduling, cost control &amp; EVM, delay/EOT analysis and look-ahead planning — built on real civil-works delivery, from a 10.78&nbsp;MWp solar plant to an 8.1&nbsp;km highway.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#track-record">See the work →</a>
+        <a class="btn btn-ghost" href="#engage">Plan a project</a>
+      </div>
+    </div>
+    <div class="id-card reveal">
+      <div class="id-photo"><img src="assets/headshot.jpg" alt="Metong Atteng"></div>
+      <div class="id-caption">
+        <div>
+          <div class="id-name">Metong Atteng</div>
+          <div class="id-role">Planning &amp; Controls Engineer</div>
+        </div>
+        <span class="id-stamp">PMP</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-strip reveal" id="statusStrip">
+    <div class="status-cell">
+      <span class="num">19%</span>
+      <span class="lbl">saved against operational budget via weekly EVM cost tracking</span>
+    </div>
+    <div class="status-cell">
+      <span class="num">WBS &amp; CPA</span>
+      <span class="lbl">on EEP III Civil works, delivered</span>
+    </div>
+    <div class="status-cell">
+      <span class="num">25+</span>
+      <span class="lbl">months running an integrated P6 schedule across concurrent utility-scale sites</span>
+    </div>
+  </div>
+</div>
+
+<section id="profile">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-code">1.0</span>
+      <h2 class="sec-title">Profile</h2>
+    </div>
+    <div class="profile-grid reveal">
+      <div class="profile-text">
+        <p><strong>I'm Metong Atteng</strong> — a Civil Engineer working as a Project Engineer at Pinemax Energy, where I run planning, scheduling and cost control on utility-scale solar civil works: an integrated Primavera P6 schedule, a Work Breakdown Structure built from scratch, take-off cost estimation, a daily/weekly Excel-based cost monitoring framework tracking planned value, earned value and actual cost, extension of time claims.</p>
+        <p>I started out at the Project Office, Ministry of Works, Ondo State, supervising the dualization and construction of a 8.1&nbsp;km flexible carriageway highway build (among others) — Marking-out, demolition and compensation, subgrade compaction, base course, asphaltic surfacing, and the quantity take-offs that fed interim payment certificates. That's where the interest in schedules, sequencing and site documentation actually started.</p>
+        <p>I hold a PMP from the International Institute of Project and Safety Management and I'm completing my Masters in Engineering Management, building toward a senior planning, scheduling and cost-control role in Nigeria's oil &amp; gas and EPCC sector.</p>
+      </div>
+      <ul class="credentials">
+        <li><span class="k">EDUCATION</span><span class="v">B.Eng Civil Engineering, Niger Delta University (2nd Class Upper)</span></li>
+        <li><span class="k">CURRENT STUDY</span><span class="v">M.Eng Engineering Management, Rivers State University (in view)</span></li>
+        <li><span class="k">CERTIFICATION</span><span class="v">PMP — Project Management Professional</span></li>
+        <li><span class="k">REGISTRATION</span><span class="v">COREN registration (in view)</span></li>
+        <li><span class="k">MEMBERSHIP</span><span class="v">Nigerian Society of Engineers (NSE)</span></li>
+        <li><span class="k">CURRENT ROLE</span><span class="v">Project Engineer, Pinemax Energy — Feb 2024–Present</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="capabilities">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-code">2.0</span>
+      <h2 class="sec-title">Capabilities</h2>
+    </div>
+    <p class="sec-lede reveal">Everything that can be done with Primavera P6 and an EVM framework — applied to real construction sequencing, not spreadsheet theory.</p>
+    <div class="cap-grid reveal">
+      <div class="cap-card">
+        <span class="code">2.1</span>
+        <h3>Schedule Development &amp; WBS</h3>
+        <p>Fully integrated Primavera P6 schedules built from a Work Breakdown Structure that actually matches site scope and sequencing.</p>
+      </div>
+      <div class="cap-card">
+        <span class="code">2.2</span>
+        <h3>CPM Scheduling</h3>
+        <p>Critical path identification and float management, so resourcing decisions protect the dates that actually matter.</p>
+      </div>
+      <div class="cap-card">
+        <span class="code">2.3</span>
+        <h3>Look-Ahead Planning</h3>
+        <p>Rolling 2–3 week look-aheads that surface risk to the critical path before it becomes a delay.</p>
+      </div>
+      <div class="cap-card">
+        <span class="code">2.4</span>
+        <h3>Cost Control &amp; EVM</h3>
+        <p>Budget-vs-actual tracking, CPI/SPI monitoring, and cost frameworks that catch overruns while they're still cheap to fix.</p>
+      </div>
+      <div class="cap-card">
+        <span class="code">2.5</span>
+        <h3>EOT &amp; Delay Claims</h3>
+        <p>Delay analysis and extension-of-time documentation grounded in the as-built schedule record, not guesswork.</p>
+      </div>
+      <div class="cap-card">
+        <span class="code">2.6</span>
+        <h3>S-Curves &amp; Variance Analysis</h3>
+        <p>Planned-vs-earned-vs-actual visualizations that make schedule and cost performance legible to stakeholders in one look.</p>
+      </div>
+      <div class="cap-card">
+        <span class="code">2.7</span>
+        <h3>Take-Off Planning &amp; Estimation</h3>
+        <p>Quantity take-offs from drawings and scope documents, feeding realistic durations, resourcing and cost inputs back into the schedule.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="track-record">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-code">3.0</span>
+      <h2 class="sec-title">Track Record</h2>
+    </div>
+
+    <div class="proj reveal">
+      <div class="proj-top">
+        <div>
+          <p class="proj-title">10.78 MWp Hybrid Solar Plant — EEP III</p>
+          <p class="proj-meta">University of Port Harcourt, Rivers State · Pinemax Energy · Feb 2024 – Present</p>
+        </div>
+        <span class="proj-role">Project Engineer</span>
+      </div>
+      <div class="proj-stats">
+        <div class="stat"><b>19%</b><span>operational budget saved</span></div>
+        <div class="stat"><b>16,212</b><span>panels mounting structure</span></div>
+        <div class="stat"><b>2 km</b><span>ClearVu perimeter fencing</span></div>
+        <div class="stat"><b>1 km+</b><span>road &amp; drainage network</span></div>
+      </div>
+      <ul>
+        <li>Built and maintained the full WBS and integrated Primavera P6 schedule across all civil scopes: 2 Gate House, 3 machine control room, 31 equipment foundation, Internal and External Access road, 1km+ drainage, 2Km perimeter fence, 2 sump-pits, 150-seater capacity PV workshop training centre and PV mounting structure works.</li>
+        <li>Ran rolling 2–3 week look-ahead planning across concurrent work-fronts, re-sequencing activities to protect the critical path when subcontractor labour became a shared constraint.</li>
+        <li>Implemented a weekly Excel-based EVM framework tracking planned value, earned value and actual cost — delivering a 19% saving against the approved operational budget.</li>
+        <li>Sourced and managed subcontractors for civil works delivery, managing project delivery and direct stakeholder progress reporting.</li>
+      </ul>
+    </div>
+
+    <div class="proj reveal">
+      <div class="proj-top">
+        <div>
+          <p class="proj-title">400 kW Hybrid Mini-Grid — Scale-Up Phase I</p>
+          <p class="proj-meta">Kogi &amp; Niger States · Pinemax Energy</p>
+        </div>
+        <span class="proj-role">Project Engineer</span>
+      </div>
+      <ul>
+        <li>Supervised civil works for a gatehouse, 16 equipment foundations and perimeter fencing across 5 remote, logistically constrained rural sites.</li>
+        <li>Coordinated local subcontractors and phased material delivery schedules to hold the project timeline despite terrain and haulage constraints.</li>
+      </ul>
+    </div>
+
+    <div class="proj reveal">
+      <div class="proj-top">
+        <div>
+          <p class="proj-title">8.1 km Dual Carriageway, Flexible Pavement</p>
+          <p class="proj-meta">Ministry of Works, Akure, Ondo State · Jan 2022 – Nov 2022</p>
+        </div>
+        <span class="proj-role">Junior Project Engineer</span>
+      </div>
+      <ul>
+        <li>Supervised setting-out, subgrade preparation and compaction testing, sub-base/base course works, and asphaltic concrete surfacing on a dual-carriageway build.</li>
+        <li>Carried out quantity take-offs feeding interim payment certificate preparation, and maintained daily site diaries and inspection records.</li>
+        <li>First hands-on exposure to schedule-driven site sequencing and the documentation discipline behind it.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="sample-work">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-code">4.0</span>
+      <h2 class="sec-title">Sample Work</h2>
+    </div>
+    <p class="sec-lede reveal">Real deliverables — schedules, progress sheet and dashboards, take-offs. Use the arrows to browse.</p>
+
+    <div class="carousel reveal">
+      <button class="carousel-arrow" id="carPrev" aria-label="Previous work">‹</button>
+      <div class="carousel-viewport">
+        <div class="carousel-track" id="carTrack">
+
+          <div class="carousel-slide">
+            <div class="sample-panel">
+              <span class="sample-tag">SCHEDULING — PRIMAVERA P6</span>
+              <p class="sample-title">Power Plant Outage Schedule — Gas Turbine Overhaul</p>
+              <div class="sample-pages">
+                <img src="assets/schedule-01-gt-outage.jpg" alt="Sample Primavera P6 gas turbine outage schedule, Gantt chart with baseline vs actual tracking" class="sample-img">
+              </div>
+              <div class="sample-footer">
+                <div class="sample-legend">
+                  <span><i style="background:#2f6690"></i>Baseline</span>
+                  <span><i style="background:#e8890f"></i>Critical Remaining Work</span>
+                  <span><i style="background:#1f9e6f"></i>Actual / Remaining Work</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="sample-panel">
+              <span class="sample-tag">SCHEDULING — PRIMAVERA P6</span>
+              <p class="sample-title">Cross-Country Pipeline Construction Schedule</p>
+              <div class="sample-pages">
+                <div>
+                  <span class="sample-page-label">Page 1 of 2</span>
+                  <img src="assets/schedule-pipeline-01.jpg" alt="Sample Primavera P6 pipeline construction schedule, page 1" class="sample-img">
+                </div>
+                <div>
+                  <span class="sample-page-label">Page 2 of 2</span>
+                  <img src="assets/schedule-pipeline-02.jpg" alt="Sample Primavera P6 pipeline construction schedule, page 2" class="sample-img">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="sample-panel">
+              <span class="sample-tag">SCHEDULING — PRIMAVERA P6</span>
+              <p class="sample-title">4-Bedroom Residential Bungalow Build Schedule</p>
+              <div class="sample-pages">
+                <div>
+                  <span class="sample-page-label">Page 1 of 2</span>
+                  <img src="assets/schedule-bungalow-01.jpg" alt="Sample Primavera P6 residential bungalow construction schedule, page 1" class="sample-img">
+                </div>
+                <div>
+                  <span class="sample-page-label">Page 2 of 2</span>
+                  <img src="assets/schedule-bungalow-02.jpg" alt="Sample Primavera P6 residential bungalow construction schedule, page 2" class="sample-img">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="sample-panel">
+              <span class="sample-tag">SCHEDULING — PRIMAVERA P6</span>
+              <p class="sample-title">500m Road Construction Schedule</p>
+              <div class="sample-pages">
+                <div>
+                  <span class="sample-page-label">Page 1 of 2</span>
+                  <img src="assets/schedule-road-01.jpg" alt="Sample Primavera P6 road construction schedule, page 1" class="sample-img">
+                </div>
+                <div>
+                  <span class="sample-page-label">Page 2 of 2 — includes cost S-curve (values blurred)</span>
+                  <img src="assets/schedule-road-02.jpg" alt="Sample Primavera P6 road construction schedule, page 2, with cost S-curve" class="sample-img">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="sample-panel">
+              <span class="sample-tag">SCHEDULING — PRIMAVERA P6</span>
+              <p class="sample-title">Marine Jetty Construction Schedule</p>
+              <div class="sample-pages">
+                <div>
+                  <span class="sample-page-label">Page 1 of 2</span>
+                  <img src="assets/schedule-jetty-01.jpg" alt="Sample Primavera P6 marine jetty construction schedule, page 1" class="sample-img">
+                </div>
+                <div>
+                  <span class="sample-page-label">Page 2 of 2</span>
+                  <img src="assets/schedule-jetty-02.jpg" alt="Sample Primavera P6 marine jetty construction schedule, page 2" class="sample-img">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="sample-panel">
+              <span class="sample-tag">COST CONTROL — EVM &amp; PROGRESS TRACKING</span>
+              <p class="sample-title">Progress Monitoring — EVM Dashboard &amp; Weekly Man-Days Histogram</p>
+              <div class="sample-pages">
+                <div>
+                  <span class="sample-page-label">EVM Dashboard (budgeted cost blurred)</span>
+                  <img src="assets/progress-evm-dashboard.jpg" alt="Sample EVM dashboard showing progress S-curve, overall progress and activity status, with budgeted cost blurred" class="sample-img">
+                </div>
+                <div>
+                  <span class="sample-page-label">Man-Days Weekly Histogram</span>
+                  <img src="assets/progress-mandays-weekly.jpg" alt="Sample weekly man-days histogram showing crew size and cumulative man-days" class="sample-img">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="sample-panel">
+              <span class="sample-tag">TAKE-OFF &amp; ESTIMATION</span>
+              <p class="sample-title">Access Road — Quantity Take-Off &amp; Cost Estimate</p>
+              <div class="sample-pages">
+                <div>
+                  <span class="sample-page-label">Earth Works</span>
+                  <img src="assets/takeoff-earthworks.jpg" alt="Sample Earth Works quantity take-off and cost estimate for an access road, with key road data and calculation values blurred" class="sample-img">
+                </div>
+                <div>
+                  <span class="sample-page-label">Surface Dressing</span>
+                  <img src="assets/takeoff-surfacedressing.jpg" alt="Sample Surface Dressing quantity take-off and cost estimate for an access road, with key road data and calculation values blurred" class="sample-img">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <button class="carousel-arrow" id="carNext" aria-label="Next work">›</button>
+    </div>
+    <p class="carousel-status" id="carStatus">1 / 7</p>
+  </div>
+
+</section>
+
+
+<section id="dashboard">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-code">5.0</span>
+      <h2 class="sec-title">Dashboard, Live</h2>
+    </div>
+    <p class="sec-lede reveal">An illustrative EVM dashboard — planned value, earned value and actual cost — built the way I'd track a real EPC schedule. Sample data below; send me yours and this becomes the real thing.</p>
+
+    <div class="dash-panel reveal">
+      <div class="dash-top">
+        <div class="dash-badges">
+          <span class="badge">CPI <b id="cpiVal">—</b></span>
+          <span class="badge">SPI <b id="spiVal">—</b></span>
+          <span class="badge">VARIANCE <b id="varVal">—</b></span>
+        </div>
+        <span class="badge">SAMPLE DATA — 12 MONTH S-CURVE</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="sCurveChart"></canvas>
+      </div>
+      <p class="dash-note">// Illustrative dataset for demonstration. Real dashboards are built against your actual WBS and cost codes.</p>
+    </div>
+  </div>
+</section>
+
+<section id="engage">
+  <div class="wrap">
+    <div class="engage-inner reveal">
+      <div>
+        <h2>Stop watching your schedule fall apart and your projects exceed budget.</h2>
+        <p>Reach out for scheduling, cost control, EVM dashboarding and delay analysis — for EPCC contractors, IOCs, and construction or real-estate developers who need their project controls sorted properly.</p>
+      </div>
+      <div class="engage-actions">
+        <div class="contact-dropdown">
+          <button class="contact-toggle" id="contactToggle" aria-expanded="false">
+            Contact Details <span class="chev">▾</span>
+          </button>
+          <div class="contact-menu" id="contactMenu">
+            <a href="mailto:metongatteng4@gmail.com">Email — metongatteng4@gmail.com <span class="arrow">→</span></a>
+            <a href="https://www.linkedin.com/in/metong-awaji" target="_blank" rel="noopener">LinkedIn <span class="arrow">→</span></a>
+            <a href="tel:+2347031480594">Call / WhatsApp — +234 703 148 0594 <span class="arrow">→</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © <span id="year"></span> Metong Atteng — Planning &amp; Controls Engineer, Nigeria.
+</footer>
+
+<button class="chat-fab" id="chatFab" aria-label="Open site guide">💬</button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-head">
+    <span><span class="chat-live-dot"></span> Site Guide</span>
+    <button id="chatClose" aria-label="Close">✕</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <p class="chat-msg bot">Hi! I'm Metong's site guide 👋 Ask me about his experience, tools, current project, or how to reach him.</p>
+  </div>
+  <div class="chat-quick">
+    <button data-q="services">Services</button>
+    <button data-q="samples">Sample work</button>
+    <button data-q="contact">Contact</button>
+    <button data-q="blog">Blog</button>
+  </div>
+  <form class="chat-input-row" id="chatForm">
+    <input type="text" id="chatInput" placeholder="Ask a question…" autocomplete="off">
+    <button type="submit" aria-label="Send">→</button>
+  </form>
+</div>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>io.observe(el));
+
+  // sample work carousel
+  (function(){
+    const track = document.getElementById('carTrack');
+    const slides = track.children;
+    const prevBtn = document.getElementById('carPrev');
+    const nextBtn = document.getElementById('carNext');
+    const status = document.getElementById('carStatus');
+    let index = 0;
+    const total = slides.length;
+
+    function render(){
+      track.style.transform = `translateX(-${index * 100}%)`;
+      status.textContent = `${index+1} / ${total}`;
+      prevBtn.disabled = index === 0;
+      nextBtn.disabled = index === total - 1;
+    }
+    prevBtn.addEventListener('click', ()=>{ if(index>0){ index--; render(); } });
+    nextBtn.addEventListener('click', ()=>{ if(index<total-1){ index++; render(); } });
+    render();
+  })();
+
+  // site guide chat widget — rule-based but conversational
+  (function(){
+    const fab = document.getElementById('chatFab');
+    const panel = document.getElementById('chatPanel');
+    const closeBtn = document.getElementById('chatClose');
+    const body = document.getElementById('chatBody');
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('chatInput');
+    let turns = 0;
+
+    function scrollDown(){ body.scrollTop = body.scrollHeight; }
+
+    function addMsg(text, who){
+      const p = document.createElement('p');
+      p.className = 'chat-msg ' + who;
+      p.textContent = text;
+      body.appendChild(p);
+      scrollDown();
+      return p;
+    }
+
+    function addSuggestions(list){
+      const wrap = document.createElement('div');
+      wrap.className = 'chat-quick chat-quick-inline';
+      list.forEach(({label, q})=>{
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = label;
+        b.addEventListener('click', ()=>{ wrap.remove(); ask(label, q); });
+        wrap.appendChild(b);
+      });
+      body.appendChild(wrap);
+      scrollDown();
+    }
+
+    function showTyping(){
+      const t = document.createElement('div');
+      t.className = 'chat-msg bot chat-typing';
+      t.innerHTML = '<span></span><span></span><span></span>';
+      body.appendChild(t);
+      scrollDown();
+      return t;
+    }
+
+    function go(text, hash, suggestions){
+      const typing = showTyping();
+      setTimeout(()=>{
+        typing.remove();
+        addMsg(text, 'bot');
+        if(hash){
+          if(hash.startsWith('http') || hash.endsWith('.html')){
+            setTimeout(()=>{ window.location.href = hash; }, 500);
+          } else {
+            document.querySelector(hash).scrollIntoView({behavior:'smooth'});
+          }
+        }
+        if(suggestions) addSuggestions(suggestions);
+        else if(turns === 2) addSuggestions([
+          {label:'See his contact details', q:'contact'},
+          {label:'View sample work', q:'samples'}
+        ]);
+      }, 480 + Math.random()*260);
+    }
+
+    const DEFAULT_SUGGESTIONS = [
+      {label:'What does he do?', q:'services'},
+      {label:'Sample work', q:'samples'},
+      {label:'Contact', q:'contact'}
+    ];
+
+    function answer(raw){
+      const q = raw.toLowerCase();
+
+      if(/^(hi|hey|hello|yo|good (morning|afternoon|evening))\b/.test(q)){
+        go("Hey! I'm Metong's site guide. Ask me about his experience, tools, current project, or how to reach him — or tap a suggestion below.", null, DEFAULT_SUGGESTIONS);
+      } else if(/thank|thanks|appreciate|cheers/.test(q)){
+        go("Anytime! Anything else you'd like to know?", null, DEFAULT_SUGGESTIONS);
+      } else if(/\bwho (are|r) you\b|\byour name\b|are you (a )?(real|human|ai)/.test(q)){
+        go("I'm a simple scripted guide built into Metong's portfolio — not a full AI model. I can point you to specifics about his work, or hand you straight to his contact details.");
+      } else if(/pinemax|current (role|job|project)|what.*(doing|working on) now/.test(q)){
+        go("He's currently a Project Engineer at Pinemax Energy (Feb 2024–present), running planning, scheduling and cost control on a 10.78 MWp hybrid solar plant at UNIPORT — full P6 schedule, WBS, and a weekly EVM framework that delivered a 19% saving against the operational budget.", '#track-record');
+      } else if(/p6|primavera/.test(q)){
+        go("Primavera P6 is his main scheduling tool — he builds fully integrated schedules from the WBS up, runs CPM/critical-path analysis, and maintains rolling 2–3 week look-aheads on live sites.", '#capabilities');
+      } else if(/excel|evm\b|earned value|cpi|spi|s-curve|s curve/.test(q)){
+        go("For cost control he runs Excel-based EVM frameworks tracking planned value, earned value and actual cost — CPI/SPI monitoring and S-curve visualizations. There's a live demo dashboard further down the page.", '#dashboard');
+      } else if(/service|capabilit|skill|schedul|cost control|delay|claim|eot|take.?off|estimat/.test(q)){
+        go("His core capabilities: schedule development & WBS, CPM scheduling, look-ahead planning, cost control & EVM, EOT/delay claims, S-curve & variance analysis, and take-off estimation — all built for real construction sequencing, not spreadsheet theory.", '#capabilities');
+      } else if(/sample|portfolio|schedule example|takeoff|dashboard example|show.*work/.test(q)){
+        go("Here are real project samples — schedules, take-offs and progress tracking from his actual work.", '#sample-work');
+      } else if(/contact|email|phone|whatsapp|hire|reach|linkedin|get in touch|talk to him/.test(q)){
+        go("Best ways to reach him: email at metongatteng4@gmail.com, LinkedIn, or call/WhatsApp +234 703 148 0594. Taking you to the contact section.", '#engage');
+      } else if(/blog|article|post/.test(q)){
+        go("Heading to the blog now.", 'blog.html');
+      } else if(/dashboard|chart\b/.test(q)){
+        go("Here's the live EVM dashboard demo — planned value vs earned value vs actual cost, with CPI/SPI.", '#dashboard');
+      } else if(/education|degree|university|pmp|certif|coren|nse|masters|study/.test(q)){
+        go("He holds a B.Eng in Civil Engineering (Niger Delta University), is completing an M.Eng in Engineering Management, has a PMP certification, COREN registration in view, and is a member of the Nigerian Society of Engineers.", '#profile');
+      } else if(/highway|road|ondo|mini.?grid|kogi|niger state|solar|uniport|eep/.test(q)){
+        go("His track record spans a 10.78 MWp hybrid solar plant (EEP III, UNIPORT), a 400 kW hybrid mini-grid across Kogi & Niger States, and an 8.1 km dual-carriageway highway build for the Ministry of Works, Ondo State.", '#track-record');
+      } else if(/track record|history|years of experience|how long|experience\b/.test(q)){
+        go("He's been in project planning & controls since 2022 — starting on a highway build with the Ministry of Works, then moving into utility-scale solar civil works at Pinemax Energy since Feb 2024.", '#track-record');
+      } else if(/about|profile|background|who is metong|introduce/.test(q)){
+        go("Metong Atteng is a Civil Engineer working as a Project Engineer at Pinemax Energy, focused on planning, scheduling and cost control for EPC, solar and infrastructure projects in Nigeria.", '#profile');
+      } else if(/remote|location|based|nigeria|available|freelance|rate|price|cost\b/.test(q)){
+        go("He's based in Nigeria and open to project-controls work across EPCC, oil & gas and infrastructure — for availability or rates, the fastest route is a direct message.", '#engage');
+      } else if(/cv|resume/.test(q)){
+        go("There isn't a downloadable CV on the site yet — the quickest way to get one is to reach out directly.", '#engage');
+      } else {
+        go("I didn't quite catch that — I'm a scripted guide, not a full AI. Try asking about his tools (P6, EVM), his current project, his background, or how to contact him.", null, DEFAULT_SUGGESTIONS);
+      }
+    }
+
+    function ask(label, q){
+      addMsg(label, 'user');
+      turns++;
+      setTimeout(()=>answer(q), 150);
+    }
+
+    fab.addEventListener('click', ()=>{
+      panel.classList.toggle('open');
+      if(panel.classList.contains('open')) setTimeout(()=>input.focus(), 200);
+    });
+    closeBtn.addEventListener('click', ()=>panel.classList.remove('open'));
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const val = input.value.trim();
+      if(!val) return;
+      input.value = '';
+      ask(val, val);
+    });
+    document.querySelectorAll('.chat-quick:not(.chat-quick-inline) button').forEach(btn=>{
+      btn.addEventListener('click', ()=>ask(btn.textContent, btn.dataset.q));
+    });
+  })();
+
+  // sidebar nav
+  (function(){
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const closeBtn = document.getElementById('sidebarClose');
+    const headerEl = document.querySelector('header.nav');
+
+    function positionToggle(){
+      const top = (headerEl.offsetHeight + 14) + 'px';
+      toggleBtn.style.top = top;
+      closeBtn.style.top = top;
+    }
+    positionToggle();
+    window.addEventListener('resize', positionToggle);
+    window.addEventListener('load', positionToggle);
+
+    function openSidebar(){
+      sidebar.classList.remove('closed');
+      toggleBtn.classList.add('is-hidden');
+      backdrop.classList.add('show');
+    }
+    function closeSidebar(){
+      sidebar.classList.add('closed');
+      toggleBtn.classList.remove('is-hidden');
+      backdrop.classList.remove('show');
+    }
+    // closed by default; opened via the edge arrow
+    closeSidebar();
+
+    toggleBtn.addEventListener('click', openSidebar);
+    closeBtn.addEventListener('click', closeSidebar);
+    backdrop.addEventListener('click', closeSidebar);
+    sidebar.querySelectorAll('.sidebar-links a').forEach(a=>{
+      a.addEventListener('click', closeSidebar);
+    });
+  })();
+
+  // contact dropdown
+  (function(){
+    const toggle = document.getElementById('contactToggle');
+    const menu = document.getElementById('contactMenu');
+    toggle.addEventListener('click', ()=>{
+      const isOpen = menu.classList.toggle('open');
+      toggle.classList.toggle('open', isOpen);
+      toggle.setAttribute('aria-expanded', isOpen);
+    });
+  })();
+
+  // sample EVM data (illustrative)
+  const months = Array.from({length:12}, (_,i)=>`M${i+1}`);
+  const pv = [4,9,15,23,32,42,53,64,74,84,93,100];
+  const ev = [3.5,8,13.5,21,30,40,50,61,71,81,90,98];
+  const ac = [3.8,8.6,14.6,22.4,31,40.5,49.5,58,66,74,81,89];
+
+  const cpi = (ev[ev.length-1]/ac[ac.length-1]).toFixed(2);
+  const spi = (ev[ev.length-1]/pv[pv.length-1]).toFixed(2);
+  const variance = (( (ev[ev.length-1]-ac[ac.length-1]) )).toFixed(1);
+  document.getElementById('cpiVal').textContent = cpi;
+  document.getElementById('spiVal').textContent = spi;
+  document.getElementById('varVal').textContent = (variance>=0?'+':'') + variance + '%';
+
+  const ctx = document.getElementById('sCurveChart').getContext('2d');
+  Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+  Chart.defaults.color = '#5c6b76';
+  new Chart(ctx, {
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[
+        {label:'Planned Value (PV)', data:pv, borderColor:'#2f6690', backgroundColor:'transparent', tension:0.3, borderWidth:2, pointRadius:0},
+        {label:'Earned Value (EV)', data:ev, borderColor:'#e8890f', backgroundColor:'rgba(232,137,15,0.10)', tension:0.3, borderWidth:2.5, pointRadius:0, fill:true},
+        {label:'Actual Cost (AC)', data:ac, borderColor:'#1f9e6f', backgroundColor:'transparent', tension:0.3, borderWidth:2, borderDash:[4,3], pointRadius:0},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{position:'bottom', labels:{boxWidth:12, padding:18, font:{size:12}}},
+        tooltip:{backgroundColor:'#ffffff', borderColor:'rgba(15,42,61,0.18)', borderWidth:1, titleColor:'#12222e', bodyColor:'#33434e', titleFont:{size:12}, bodyFont:{size:12}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(15,42,61,0.07)'}},
+        y:{grid:{color:'rgba(15,42,61,0.07)'}, ticks:{callback:(v)=>v+'%'}}
+      }
+    }
+  });
+</script>
+
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script>
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", (user) => {
+      if (!user) {
+        window.netlifyIdentity.on("login", () => {
+          document.location.href = "/admin/";
+        });
+      }
+    });
+  }
+</script>
+</body>
+</html>
